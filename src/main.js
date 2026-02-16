@@ -4,12 +4,20 @@
  * @param _product карточка товара
  * @returns {number}
  */
-function calculateSimpleRevenue(purchase, _product) {
-   // @TODO: Расчет выручки от операции
+function calculateSimpleRevenue(purchase, product) {
     const discount = purchase.discount / 100;
-    const revenue = purchase.quantity * _product.sale_price * (1 - discount);
-    return revenue;
+
+    const price =
+        purchase.sale_price ??
+        product.sale_price;
+
+    return (
+        purchase.quantity *
+        price *
+        (1 - discount)
+    );
 }
+
 
 /**
  * Функция для расчета бонусов
@@ -40,20 +48,22 @@ function calculateBonusByProfit(index, total, seller) {
  */
 function analyzeSalesData(data, options) {
     // @TODO: Проверка входных данных
-    const { calculateRevenue, calculateBonus } = options;
-    if (!data 
-        || !Array.isArray(data.sellers) 
-        || data.sellers.length === 0
-    ) {
-        throw new Error("Некорректные входные данные");
-    };
-    // @TODO: Проверка наличия опций
-    if (typeof options !== "object"
-        || typeof calculateRevenue !== "function"
-        || typeof calculateBonus !== "function"
-    ) {
+        if (
+        typeof options !== "object" ||
+        options === null
+        ) {
         throw new Error("Некорректные опции");
-    }
+        }
+
+        const { calculateRevenue, calculateBonus } = options;
+
+        if (
+        typeof calculateRevenue !== "function" ||
+        typeof calculateBonus !== "function"
+        ) {
+        throw new Error("Некорректные опции");
+        }
+
     // @TODO: Подготовка промежуточных данных для сбора статистики
     const sellerStats = data.sellers.map(seller => ({
         seller_id: seller.id,
