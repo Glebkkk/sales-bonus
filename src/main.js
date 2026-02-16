@@ -152,6 +152,6 @@ function analyzeSalesData(data, options) {
 
         top_products: seller.top_products,
 
-        bonus: +seller.bonus.toFixed(2)
+        bonus: seller.bonus
     }));
 }
