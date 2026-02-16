@@ -113,11 +113,11 @@ function analyzeSalesData(data, options) {
             // Посчитать себестоимость (cost) товара как product.purchase_price, умноженную на количество товаров из чека
             const cost = product.purchase_price * item.quantity;
             // Посчитать выручку (revenue) с учётом скидки через функцию calculateRevenue
-            const revenue = calculateRevenue(item, product);
+            const revenue = +calculateRevenue(item, product).toFixed(2);
             // Посчитать прибыль: выручка минус себестоимость
             const profit = revenue - cost;
             // Увеличить общую накопленную прибыль (profit) у продавца
-            seller.profit += +(revenue - cost).toFixed(2);
+            seller.profit += +(profit).toFixed(2);
 
             // Учёт количества проданных товаров
             if (!seller.products_sold[item.sku]) {
@@ -152,6 +152,6 @@ function analyzeSalesData(data, options) {
 
         top_products: seller.top_products,
 
-        bonus: seller.bonus
+        bonus: +seller.bonus.toFixed(2)
     }));
 }
