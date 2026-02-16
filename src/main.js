@@ -11,9 +11,11 @@ function calculateSimpleRevenue(purchase, product) {
 
     const fullprice = price * purchase.quantity;
 
-    return fullprice * (1 - discount);
-}
+    const revenue =
+        fullprice * (1 - discount);
 
+    return +revenue.toFixed(2);
+}
 
 /**
  * Функция для расчета бонусов
@@ -99,7 +101,7 @@ function analyzeSalesData(data, options) {
             const revenue =
                 calculateRevenue(item, product);
 
-            return sum + +revenue.toFixed(2);
+            return sum + +revenue;
         }, 0);
 
 
@@ -110,7 +112,7 @@ function analyzeSalesData(data, options) {
             if (!product) return;
             const cost = product.purchase_price * item.quantity;
             // Посчитать выручку (revenue) с учётом скидки через функцию calculateRevenue
-            const revenue = +calculateRevenue(item, product).toFixed(2);
+            const revenue = calculateRevenue(item, product);
             // Посчитать прибыль: выручка минус себестоимость
             const profit = +(revenue - cost).toFixed(2);
             // Увеличить общую накопленную прибыль (profit) у продавца
