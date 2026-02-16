@@ -14,7 +14,7 @@ function calculateSimpleRevenue(purchase, product) {
     const revenue =
         fullprice * (1 - discount);
 
-    return +revenue.toFixed(2);
+    return revenue;
 }
 
 /**
