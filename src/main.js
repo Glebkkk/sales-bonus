@@ -7,14 +7,13 @@
 function calculateSimpleRevenue(purchase, product) {
     const discount = purchase.discount / 100;
 
-    const price = purchase.sale_price;
+    const price =
+        purchase.sale_price ??
+        product.sale_price;
 
     const fullprice = price * purchase.quantity;
 
-    const revenue =
-        fullprice * (1 - discount);
-
-    return revenue;
+    return fullprice * (1 - discount);
 }
 
 /**
@@ -101,7 +100,7 @@ function analyzeSalesData(data, options) {
             const revenue =
                 calculateRevenue(item, product);
 
-            return sum + +revenue;
+            return sum + +revenue.toFixed(2);
         }, 0);
 
 
@@ -116,7 +115,7 @@ function analyzeSalesData(data, options) {
             // Посчитать прибыль: выручка минус себестоимость
             const profit = revenue - cost;
             // Увеличить общую накопленную прибыль (profit) у продавца
-            seller.profit += profit;
+            seller.profit += +profit.toFixed(2);
 
             // Учёт количества проданных товаров
             if (!seller.products_sold[item.sku]) {
