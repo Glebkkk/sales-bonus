@@ -102,13 +102,16 @@ function analyzeSalesData(data, options) {
         seller.sales_count += 1;
 
         // ---- ВЫРУЧКА (без округления внутри)
-        const recordRevenue = record.items.reduce((sum, item) => {
-            const product = productIndex[item.sku];
-            if (!product) return sum;
+     const recordRevenue = record.items.reduce((sum, item) => {
+    const product = productIndex[item.sku];
+    if (!product) return sum;
 
-            const revenue = calculateRevenue(item, product);
-            return sum + revenue;
-        }, 0);
+    const revenue = round2(
+        calculateRevenue(item, product)
+    );
+
+    return sum + revenue;
+}, 0);
 
         seller.revenue += recordRevenue;
 
