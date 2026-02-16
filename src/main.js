@@ -11,11 +11,9 @@ function calculateSimpleRevenue(purchase, product) {
         purchase.sale_price ??
         product.sale_price;
 
-    return (
-        purchase.quantity *
-        price *
-        (1 - discount)
-    );
+    const fullprice = price * purchase.quantity;
+
+    return fullprice * (1 - discount);
 }
 
 
@@ -57,9 +55,9 @@ function analyzeSalesData(data, options) {
 
         const { calculateRevenue, calculateBonus } = options;
 
-        if (
-        typeof calculateRevenue !== "function" ||
-        typeof calculateBonus !== "function"
+        if (!data.purchase_records || 
+            typeof calculateRevenue !== "function" ||
+            typeof calculateBonus !== "function"
         ) {
         throw new Error("Некорректные опции");
         }
