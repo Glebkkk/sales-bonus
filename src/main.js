@@ -46,14 +46,23 @@ function calculateBonusByProfit(index, total, seller) {
  */
 function analyzeSalesData(data, options) {
     // @TODO: Проверка входных данных
+     // Проверка опций
         if (
-        typeof options !== "object" ||
-        options === null
+            typeof options !== "object" ||
+            options === null
         ) {
-        throw new Error("Некорректные опции");
+            throw new Error("Некорректные опции");
         }
 
         const { calculateRevenue, calculateBonus } = options;
+
+        if (
+            typeof calculateRevenue !== "function" ||
+            typeof calculateBonus !== "function"
+        ) {
+            throw new Error("Некорректные опции");
+        }
+
 
         if (
             !data ||
