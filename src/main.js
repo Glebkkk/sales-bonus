@@ -7,7 +7,7 @@
 function calculateSimpleRevenue(purchase, product) {
     const discount = purchase.discount / 100;
 
-    const price = product.sale_price;
+    const price = purchase.sale_price;
 
     const fullprice = price * purchase.quantity;
 
