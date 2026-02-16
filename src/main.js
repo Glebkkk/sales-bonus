@@ -1,7 +1,7 @@
 /**
  * Функция для расчета выручки
  * @param purchase запись о покупке
- * @param product карточка товара
+ * @param _product карточка товара
  * @returns {number}
  */
 function calculateSimpleRevenue(purchase, product) {
@@ -17,8 +17,7 @@ function calculateSimpleRevenue(purchase, product) {
     return revenue;
 }
 
-const toCents = (value) => Math.round((value + Number.EPSILON) * 100);
-const fromCents = (cents) => cents / 100;
+const round2 = (value) => Math.round((value + Number.EPSILON) * 100) / 100;
 
 /**
  * Функция для расчета бонусов
@@ -81,13 +80,13 @@ function analyzeSalesData(data, options) {
     // @TODO: Подготовка промежуточных данных для сбора статистики
     const sellerStats = data.sellers.map(seller => ({
         seller_id: seller.id,
-        name: ${seller.first_name} ${seller.last_name},
+        name: `${seller.first_name} ${seller.last_name}`,
         sales_count: 0,
-        revenue_cents: 0,
-        profit_cents: 0,
+        revenue: 0,
+        profit: 0,
         top_products: {},
         products_sold: {},
-        bonus_cents: 0
+        bonus: 0
     }));
     // @TODO: Индексация продавцов и товаров для быстрого доступа
     const sellerIndex = Object.fromEntries(sellerStats.map(item => [item.seller_id, item]));
@@ -97,20 +96,29 @@ function analyzeSalesData(data, options) {
         const seller = sellerIndex[record.seller_id]; // Продавец
         // Увеличить количество продаж
         seller.sales_count += 1;
+        // Увеличить общую сумму выручки всех продаж
+        seller.revenue = round2(seller.revenue + record.items.reduce((sum, item) => {
+            const product = productIndex[item.sku];
+
+            const revenue =
+                calculateRevenue(item, product);
+
+            return round2(sum + revenue);
+        }, 0));
+
+
+        // Расчёт прибыли для каждого товара
         record.items.forEach(item => {
             const product = productIndex[item.sku]; // Товар
             // Посчитать себестоимость (cost) товара как product.purchase_price, умноженную на количество товаров из чека
             if (!product) return;
-            const costCents = toCents(product.purchase_price) * item.quantity;
+            const cost = product.purchase_price * item.quantity;
             // Посчитать выручку (revenue) с учётом скидки через функцию calculateRevenue
             const revenue = calculateRevenue(item, product);
-            const revenueCents = toCents(revenue);
-            // Увеличить общую сумму выручки всех продаж
-            seller.revenue_cents += revenueCents;
             // Посчитать прибыль: выручка минус себестоимость
-            const profitCents = revenueCents - costCents;
+            const profit = round2(revenue - cost);
             // Увеличить общую накопленную прибыль (profit) у продавца
-            seller.profit_cents += profitCents;
+            seller.profit = round2(seller.profit + profit);
 
             // Учёт количества проданных товаров
             if (!seller.products_sold[item.sku]) {
@@ -120,15 +128,12 @@ function analyzeSalesData(data, options) {
             seller.products_sold[item.sku] += item.quantity;
         });
     });
+
     // @TODO: Сортировка продавцов по прибыли
-    sellerStats.sort((a, b) => b.profit_cents - a.profit_cents);
+    sellerStats.sort((a, b) => b.profit - a.profit);
     // @TODO: Назначение премий на основе ранжирования
     sellerStats.forEach((seller, index) => {
-        const bonus = calculateBonus(index, sellerStats.length, {
-            ...seller,
-            profit: fromCents(seller.profit_cents)
-        });
-        seller.bonus_cents = toCents(bonus);
+        seller.bonus = calculateBonusByProfit(index, sellerStats.length, seller);
         seller.top_products = Object.entries(seller.products_sold).map(([sku, quantity]) => ({
             sku,
             quantity
@@ -141,13 +146,13 @@ function analyzeSalesData(data, options) {
         seller_id: seller.seller_id,
         name: seller.name,
 
-        revenue: fromCents(seller.revenue_cents),
-        profit: fromCents(seller.profit_cents),
+        revenue: +seller.revenue.toFixed(2),
+        profit: +seller.profit.toFixed(2),
 
         sales_count: seller.sales_count,
 
         top_products: seller.top_products,
 
-        bonus: fromCents(seller.bonus_cents)
+        bonus: +seller.bonus.toFixed(2)
     }));
 }
