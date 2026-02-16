@@ -107,26 +107,28 @@ function analyzeSalesData(data, options) {
         }, 0);
 
 
-        // Расчёт прибыли для каждого товара
-        record.items.forEach(item => {
-            const product = productIndex[item.sku]; // Товар
-            // Посчитать себестоимость (cost) товара как product.purchase_price, умноженную на количество товаров из чека
-            const cost = +(product.purchase_price * item.quantity).toFixed(2);
-            // Посчитать выручку (revenue) с учётом скидки через функцию calculateRevenue
-            const revenue = +calculateRevenue(item, product).toFixed(2);
-            // Посчитать прибыль: выручка минус себестоимость
-            const profit = +(revenue - cost).toFixed(2);
-            // Увеличить общую накопленную прибыль (profit) у продавца
-            seller.profit += profit;
+   record.items.forEach(item => {
+    const product = productIndex[item.sku];
+    if (!product) return;
 
-            // Учёт количества проданных товаров
-            if (!seller.products_sold[item.sku]) {
-                seller.products_sold[item.sku] = 0;
-            }
-            // По артикулу товара увеличить его проданное количество у продавца
-            seller.products_sold[item.sku] += item.quantity;
-        });
- });
+    const revenueRaw =
+        calculateRevenue(item, product);
+
+    const costRaw =
+        product.purchase_price * item.quantity;
+
+    const profit =
+        +(revenueRaw - costRaw).toFixed(2);
+
+    seller.profit += profit;
+
+    if (!seller.products_sold[item.sku]) {
+        seller.products_sold[item.sku] = 0;
+    }
+
+    seller.products_sold[item.sku] += item.quantity;
+});
+ß
 
     // @TODO: Сортировка продавцов по прибыли
     sellerStats.sort((a, b) => b.profit - a.profit);
